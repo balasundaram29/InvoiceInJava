@@ -347,14 +347,24 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         saveButton = new JButton("Save");
         saveButton.addActionListener(new SaveButtonListener());
         add(saveButton);
-        // populateWidgets();
+        populateWidgets();
         //    add(label);
 
     }
 
     public void populateWidgets() {
-        invoiceNoTextField.setText("112");
-        taxRateTextField.setText("5.5");
+        try {
+                    String q = "SELECT MAX(`invno`) from `Invoices`";// WHERE `name`=" + "\'" + (String) buyerCombo.getSelectedItem() + "\'";
+                    Statement s = conn.createStatement();
+                    ResultSet rs = s.executeQuery(q);
+                    if (rs.next()) {
+                        invoiceNoTextField.setText(Integer.toString(rs.getInt(1)+1));
+                    }
+                } catch (SQLException ex) {
+                    Logger.getLogger(InvoiceEditWidget.class.getName()).log(Level.SEVERE, null, ex);
+                }
+       // invoiceNoTextField.setText("112");
+        //taxRateTextField.setText("5.5");
     }
 
     public void loadValuesFromHashMaps() {
@@ -399,6 +409,12 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
             formCCheckBox.setSelected(true);
         } else {
             formCCheckBox.setSelected(false);
+        }
+        if(widgetValues.get(InvoiceConstants.REMARKS_KEY)==null){
+            remarksField.setText("");
+        }else{
+             c= widgetValues.get(InvoiceConstants.REMARKS_KEY) + "";
+             remarksField.setText(c);
         }
         //if (tableItemsList != null && tableItemsList.size() != 0) {
         computeTotal();
