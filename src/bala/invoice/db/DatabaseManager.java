@@ -125,6 +125,8 @@ public class DatabaseManager {
     public static void createTriggersOnly(Connection conn) {
         try {
             Statement statement = conn.createStatement();
+             statement.executeUpdate("SET AUTOCOMMIT=0");
+            statement.executeUpdate("START TRANSACTION");
             String sql = "delimiter $$\n"
                     + "CREATE TRIGGER one_invno_per_finyear\n"
                     + "BEFORE INSERT ON Invoices FOR EACH ROW\n"
@@ -137,8 +139,9 @@ public class DatabaseManager {
             System.out.print(sql);
             PrintWriter writer = new PrintWriter("filename.sql");
             writer.print(sql);
-writer.close();
+            writer.close();
             statement.executeUpdate(sql);
+            statement.executeUpdate("COMMIT");
         } catch (Exception ex) {
             Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -146,10 +149,14 @@ writer.close();
 
     public static void deleteInvoice(Connection conn,int invNo){
         try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate("SET AUTOCOMMIT=0");
+            stmt.executeUpdate("START TRANSACTION");
             String query = "DELETE   FROM `invoices` WHERE "
                     + "`invno` = " + "\'" +invNo + "\'";
-            Statement stmt = conn.createStatement();
+            
             stmt.executeUpdate(query); 
+            stmt.executeUpdate("COMMIT");
         } catch (Exception ex) {
             Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -1,4 +1,4 @@
-DROP DATABASE InvoiceDB ;
+#DROP DATABASE InvoiceDB ;
 
 CREATE DATABASE InvoiceDB;
 USE InvoiceDB;
