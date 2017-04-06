@@ -1,6 +1,5 @@
 package print.spreadsheet;
 
-
 //import com.sun.java.swing.plaf.nimbus.SliderPainter;
 import bala.invoice.gui.InvoiceConstants;
 import java.io.File;
@@ -46,12 +45,12 @@ public class PrintManager {
 
     public static int NO_OF_SHEETS = 4;
     //public static int[] COL_WIDTHS = {5, 9, 9, 9, 9, 9, 10, 16, 23};
-     public static int[] COL_WIDTHS = {5, 5, 9, 9, 9, 11, 9, 15, 23};
+    public static int[] COL_WIDTHS = {5, 5, 9, 9, 9, 11, 9, 15, 23};
     public static int LEFTMOST_COL = 0;
     public static int RIGHTMOST_COL = 8;
     public static int TOPMOST_ROW = 1;
-     public static int V_OFFSET_BOTTOM=-5;
-    public static int BOTTOMMOST_ROW = 50+V_OFFSET_BOTTOM;
+    public static int V_OFFSET_BOTTOM = -5;
+    public static int BOTTOMMOST_ROW = 50 + V_OFFSET_BOTTOM;
     public static int ROWS = 60;
     public static int TABLE_FIRST_ROW = 18;
     public static int COMP_NAME_ROW = 1;
@@ -108,39 +107,39 @@ public class PrintManager {
     public static int AMOUNT_COL = 8;
     public static int ROWS_PER_ITEM = 2;
     public static int GAP_BETWEEN_ITEMS = 0;
-   
-    public static int TOTAL_ROW = 39+V_OFFSET_BOTTOM;//40;
+
+    public static int TOTAL_ROW = 39 + V_OFFSET_BOTTOM;//40;
     public static int TOTAL_LABEL_COL = 7;
     public static int TOTAL_COL = 8;
-    public static int FORM_C_AND_TAX_ROW = 40+V_OFFSET_BOTTOM;
+    public static int FORM_C_AND_TAX_ROW = 40 + V_OFFSET_BOTTOM;
     public static int FORM_C_COL_BEGIN = 1;
     public static int FORM_C_COL_END = 5;
     public static int TAX_RATE_COL = 7;
     public static int TAX_AMOUNT_COL = 8;
-    public static int ROUNDOFF_ROW = 41+V_OFFSET_BOTTOM;
+    public static int ROUNDOFF_ROW = 41 + V_OFFSET_BOTTOM;
     public static int ROUNDOFF_LABEL_COL = 7;
     public static int ROUNDOFF_COL = 8;
-    public static int GRAND_TOTAL_ROW_BEGIN = 42+V_OFFSET_BOTTOM;
-    public static int GRAND_TOTAL_ROW_END = 44+V_OFFSET_BOTTOM;
-    public static int JURISD_ROW = 45+V_OFFSET_BOTTOM;
+    public static int GRAND_TOTAL_ROW_BEGIN = 42 + V_OFFSET_BOTTOM;
+    public static int GRAND_TOTAL_ROW_END = 44 + V_OFFSET_BOTTOM;
+    public static int JURISD_ROW = 45 + V_OFFSET_BOTTOM;
     public static int JURISD_COL_BEGIN = 0;
     public static int JURISD_COL_END = 5;
-    public static int FOR_COMPANY_ROW = 45+V_OFFSET_BOTTOM;
+    public static int FOR_COMPANY_ROW = 45 + V_OFFSET_BOTTOM;
     public static int FOR_COMPANY_COL_BEGIN = 6;
     public static int FOR_COMPANY_COL_END = 8;
-    public static int AUTH_SIGNATORY_ROW = 50+V_OFFSET_BOTTOM;
+    public static int AUTH_SIGNATORY_ROW = 50 + V_OFFSET_BOTTOM;
     public static int AUTH_SIGNATORY_COL_BEGIN = 6;
     public static int AUTH_SIGNATORY_COL_END = 8;
-    public static int PREPARED_ROW_BEGIN = 48+V_OFFSET_BOTTOM;
-    public static int PREPARED_ROW_END = 50+V_OFFSET_BOTTOM;
+    public static int PREPARED_ROW_BEGIN = 48 + V_OFFSET_BOTTOM;
+    public static int PREPARED_ROW_END = 50 + V_OFFSET_BOTTOM;
     public static int PREPARED_COL_BEGIN = 0;
     public static int PREPARED_COL_END = 2;
-    public static int CHECKED_ROW_BEGIN = 48+V_OFFSET_BOTTOM;
-    public static int CHECKED_ROW_END = 50+V_OFFSET_BOTTOM;
+    public static int CHECKED_ROW_BEGIN = 48 + V_OFFSET_BOTTOM;
+    public static int CHECKED_ROW_END = 50 + V_OFFSET_BOTTOM;
     public static int CHECKED_COL_BEGIN = 3;
     public static int CHECKED_COL_END = 5;
-    public static int INTEREST_ROW_BEGIN = 46+V_OFFSET_BOTTOM;
-    public static int INTEREST_ROW_END = 47+V_OFFSET_BOTTOM;
+    public static int INTEREST_ROW_BEGIN = 46 + V_OFFSET_BOTTOM;
+    public static int INTEREST_ROW_END = 47 + V_OFFSET_BOTTOM;
     public static int INTEREST_COL_BEGIN = 0;
     public static int INTEREST_COL_END = 5;
     public static int GRAND_TOTAL_IN_WORDS_COL_BEGIN = 0;
@@ -160,18 +159,18 @@ public class PrintManager {
     public void printInExcel(HashMap widgetValues, HashMap<String, Integer> productMap) {
         try {
             System.out.println("creating book");
-           
+
             //Create a workbook named  invoice.xls from scratch ;chris.png required in path
             WritableWorkbook xlBook = Workbook.createWorkbook(new File("invoice.xls"));//,in);
 
             for (int sheetNo = 0; sheetNo < NO_OF_SHEETS; sheetNo++) {
 
                 WritableSheet sheet = xlBook.createSheet(sheetNames[sheetNo], sheetNo);
-              //  WritableSheet sheet = xlBook.createSheet(" ",sheetNo);
+                //  WritableSheet sheet = xlBook.createSheet(" ",sheetNo);
 //WritableSheet sheet =xlBook.getSheet(sheetNo);//125
 
-                for (int i = 13; i <18; i++) {
-                    sheet.setRowView(i,400);
+                for (int i = 13; i < 18; i++) {
+                    sheet.setRowView(i, 400);
                 }
                 for (int i = 0; i < 9; i++) {
                     sheet.setColumnView(i, COL_WIDTHS[i]);
@@ -200,8 +199,11 @@ public class PrintManager {
                             false, Alignment.LEFT, false, true, false, false, "");
 
                 }
-                WritableImage image = new WritableImage(0, 2, 2.5, 3.75, new File("cris.png"));
-                sheet.addImage(image);
+                File file = new File("chris.png");
+                if (file.exists()) {
+                    WritableImage image = new WritableImage(0, 2, 2.5, 3.75, new File("cris.png"));
+                    sheet.addImage(image);
+                }
 
                 mergeCellsCreateAndAddLabelWithBorders(COMP_NAME_COL, COMP_NAME_ROW,
                         RIGHTMOST_COL, COMP_NAME_ROW, sheet, 22, true, Alignment.CENTRE,
@@ -251,13 +253,14 @@ public class PrintManager {
                         sheet, 14, false, Alignment.LEFT, true, true, false, false, (String) widgetValues.get(InvoiceConstants.BUYER_NAME_KEY));
 
                 //  fontCalibri = new WritableFont(fontNameCalibri, 14, WritableFont.NO_BOLD);
-                 String[] addressRows=new String[BUYER_ADDRESS_ROWS_COUNT];
+                String[] addressRows = new String[BUYER_ADDRESS_ROWS_COUNT];
                 String[] addressRowsAvailable = ((String) widgetValues.get(InvoiceConstants.BUYER_ADDRESS_KEY)).split("\n");
-                for (int i=0;i<addressRows.length;i++){
-                    if (!(i < addressRowsAvailable.length))
-                        addressRows[i]="";
-                    else
-                        addressRows[i]=addressRowsAvailable[i];
+                for (int i = 0; i < addressRows.length; i++) {
+                    if (!(i < addressRowsAvailable.length)) {
+                        addressRows[i] = "";
+                    } else {
+                        addressRows[i] = addressRowsAvailable[i];
+                    }
                 }
                 for (int k = 0; k < addressRows.length; k++) {
                     mergeCellsCreateAndAddLabelWithBorders(BUYER_ADDRESS_COL_BEGIN, BUYER_ADDRESS_ROW + k, BUYER_ADDRESS_COL_END,
@@ -368,14 +371,14 @@ public class PrintManager {
                 }
                 sheet.mergeCells(DESC_COL_BEGIN, CURR_ROW, DESC_COL_END, CURR_ROW + ROWS_PER_ITEM - 1);
                 cellFormat = new WritableCellFormat(fontCalibri);
-                    cellFormat.setAlignment(Alignment.LEFT);
-                    cellFormat.setWrap(true);//)
-                    cellFormat.setBorder(Border.LEFT, BorderLineStyle.THIN);
-                    cellFormat.setBorder(Border.RIGHT, BorderLineStyle.THIN);
-                    cellFormat.setVerticalAlignment(VerticalAlignment.TOP);
-                    label = new Label(DESC_COL_BEGIN, CURR_ROW, "" + widgetValues.get(InvoiceConstants.REMARKS_KEY));
-                    label.setCellFormat(cellFormat);
-                    sheet.addCell(label);
+                cellFormat.setAlignment(Alignment.LEFT);
+                cellFormat.setWrap(true);//)
+                cellFormat.setBorder(Border.LEFT, BorderLineStyle.THIN);
+                cellFormat.setBorder(Border.RIGHT, BorderLineStyle.THIN);
+                cellFormat.setVerticalAlignment(VerticalAlignment.TOP);
+                label = new Label(DESC_COL_BEGIN, CURR_ROW, "" + widgetValues.get(InvoiceConstants.REMARKS_KEY));
+                label.setCellFormat(cellFormat);
+                sheet.addCell(label);
                 createAndAddLabelWithBorders(TOTAL_LABEL_COL, TOTAL_ROW, sheet, 12,
                         false, Alignment.RIGHT, true, true, false, false,
                         "Total");
