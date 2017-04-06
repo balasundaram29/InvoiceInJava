@@ -1,6 +1,5 @@
 package bala.invoice.gui;
 
-
 import bala.invoice.db.ColumnNamesCountIncorrectException;
 import bala.invoice.db.DBUtilities;
 import java.awt.Color;
@@ -42,7 +41,6 @@ public class InvoiceListWidget extends JPanel {
                 "grow"));
         try {
 
-
             backButton = new JButton("Back To Sales Entry");
             refreshButton = new JButton("Refresh");
             refreshButton.addActionListener(new ActionListener() {
@@ -55,16 +53,13 @@ public class InvoiceListWidget extends JPanel {
             Connection conn = DBUtilities.getConnection();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(
-                    "SELECT `invno` AS 'Invoice No',`invdate`  AS 'Date',`name` AS 'Buyer',"
+                    "SELECT `invno` AS 'Invoice No',DATE_FORMAT(`invdate`,'%d-%m-%Y')  AS 'Date',`name` AS 'Buyer',"
                     + " `bill_value`  AS 'Invoice Value' FROM `invoices`"
-                    + " INNER JOIN `buyers` ON `invoices`.`buyerID`=`buyers`.`buyerID`");
+                    + " INNER JOIN `buyers` ON `invoices`.`buyerID`=`buyers`.`buyerID`"
+                    + "ORDER BY `invdate`,`invno`");
             Object[] columnNamesArray = {"Invoice No", "Date", "Buyer", "Invoice Value"};
             DefaultTableModel model = DBUtilities.buildTableModel(rs, columnNamesArray);
             table = new JTable(model);
-
-
-
-
             table.setColumnSelectionAllowed(false);
             JScrollPane scroller = new JScrollPane(table);
             table.setFillsViewportHeight(true);
@@ -79,24 +74,25 @@ public class InvoiceListWidget extends JPanel {
             Logger.getLogger(InvoiceListWidget.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-
     }
 
-    public void refresh(){
+    public void refresh() {
         refreshButton.doClick();
     }
+
     public void loadListFromDB() {
         try {
             Connection conn = DBUtilities.getConnection();
             Statement stmt = conn.createStatement();
-           // ResultSet rs = stmt.executeQuery("SELECT `invno`,`invdate`,`bill_value` FROM `invoices`");
-             ResultSet rs = stmt.executeQuery(
-                    "SELECT `invno` AS 'Invoice No',`invdate`  AS 'Date',`name` AS 'Buyer',"
+            // ResultSet rs = stmt.executeQuery("SELECT `invno`,`invdate`,`bill_value` FROM `invoices`");
+            ResultSet rs = stmt.executeQuery(
+                    "SELECT `invno` AS 'Invoice No',DATE_FORMAT(`invdate`,'%d-%m-%Y')  AS 'Date',`name` AS 'Buyer',"
                     + " `bill_value`  AS 'Invoice Value' FROM `invoices`"
-                    + " INNER JOIN `buyers` ON `invoices`.`buyerID`=`buyers`.`buyerID`");
+                    + " INNER JOIN `buyers` ON `invoices`.`buyerID`=`buyers`.`buyerID`"
+                    + "ORDER BY `invdate`,`invno`");
             Object[] columnNamesArray = {"Invoice No", "Date", "Buyer", "Invoice Value"};
             DefaultTableModel model = DBUtilities.buildTableModel(rs, columnNamesArray);
-           // DefaultTableModel model = DBUtilities.buildTableModel(rs);
+            // DefaultTableModel model = DBUtilities.buildTableModel(rs);
             table.setModel(model);
 
         } catch (Exception ex) {
