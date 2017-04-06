@@ -160,7 +160,7 @@ public class PrintManager {
         try {
             System.out.println("creating book");
 
-            //Create a workbook named  invoice.xls from scratch ;chris.png required in path
+            //Create a workbook named  invoice.xls from scratch ;cris.png required in path
             WritableWorkbook xlBook = Workbook.createWorkbook(new File("invoice.xls"));//,in);
 
             for (int sheetNo = 0; sheetNo < NO_OF_SHEETS; sheetNo++) {
@@ -199,9 +199,9 @@ public class PrintManager {
                             false, Alignment.LEFT, false, true, false, false, "");
 
                 }
-                File file = new File("chris.png");
+                File file = new File("cris.png");
                 if (file.exists()) {
-                    WritableImage image = new WritableImage(0, 2, 2.5, 3.75, new File("chris.png"));
+                    WritableImage image = new WritableImage(0, 2, 2.5, 3.75, new File("cris.png"));
                     sheet.addImage(image);
                 }
 
