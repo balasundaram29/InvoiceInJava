@@ -201,7 +201,7 @@ public class PrintManager {
                 }
                 File file = new File("chris.png");
                 if (file.exists()) {
-                    WritableImage image = new WritableImage(0, 2, 2.5, 3.75, new File("cris.png"));
+                    WritableImage image = new WritableImage(0, 2, 2.5, 3.75, new File("chris.png"));
                     sheet.addImage(image);
                 }
 
