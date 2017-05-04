@@ -125,7 +125,7 @@ public class DatabaseManager {
     public static void createTriggersOnly(Connection conn) {
         try {
             Statement statement = conn.createStatement();
-             statement.executeUpdate("SET AUTOCOMMIT=0");
+            statement.executeUpdate("SET AUTOCOMMIT=0");
             statement.executeUpdate("START TRANSACTION");
             String sql = "delimiter $$\n"
                     + "CREATE TRIGGER one_invno_per_finyear\n"
@@ -147,27 +147,34 @@ public class DatabaseManager {
         }
     }
 
-    public static void deleteInvoice(Connection conn,int invNo){
+    public static void deleteInvoice(Connection conn, int invNo) {
         try {
             Statement stmt = conn.createStatement();
             stmt.executeUpdate("SET AUTOCOMMIT=0");
             stmt.executeUpdate("START TRANSACTION");
             String query = "DELETE   FROM `invoices` WHERE "
-                    + "`invno` = " + "\'" +invNo + "\'";
-            
-            stmt.executeUpdate(query); 
+                    + "`invno` = " + "\'" + invNo + "\'";
+
+            stmt.executeUpdate(query);
             stmt.executeUpdate("COMMIT");
         } catch (Exception ex) {
             Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
     public static void saveValues(Connection conn, HashMap widgetValues, HashMap<String, Integer> productMap) {
         try {
-
+            String yearString = "";
+            if (InvoiceConstants.FIN_YEAR_FIRST_PART <= 0) {
+                return;//yearLabel = new JLabel("Financial Year : None Selected");
+            } else {
+                yearString = "BETWEEN '" + InvoiceConstants.FIN_YEAR_FIRST_PART + "-04-01' AND '" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1) + "-03-31' ";
+            }
             Statement stmt = conn.createStatement();
 
             String query = "SELECT * FROM `invoices` WHERE `invno` = " + "\'"
-                    + widgetValues.get(InvoiceConstants.INV_NO_KEY) + "\'";
+                    + widgetValues.get(InvoiceConstants.INV_NO_KEY) + "\'"
+                     + "AND `invdate` " + yearString;
             ResultSet rs = stmt.executeQuery(query);
             //  query.exec_(s);
             if (rs.next()) {
@@ -180,12 +187,14 @@ public class DatabaseManager {
             stmt.executeUpdate("SET AUTOCOMMIT=0");
             stmt.executeUpdate("START TRANSACTION");
            // query = "DELETE   FROM `Particulars` WHERE "
-               //     + "`invno` = " + "\'" + widgetValues.get(InvoiceConstants.INV_NO_KEY) + "\'";
+            //     + "`invno` = " + "\'" + widgetValues.get(InvoiceConstants.INV_NO_KEY) + "\'";
 
-          //  stmt.executeUpdate(query);
-
+            //  stmt.executeUpdate(query);
+            
+            
             query = "DELETE   FROM `invoices` WHERE "
-                    + "`invno` = " + "\'" + widgetValues.get(InvoiceConstants.INV_NO_KEY) + "\'";
+                    + "`invno` = " + "\'" + widgetValues.get(InvoiceConstants.INV_NO_KEY) + "\'"
+                    + "AND `invdate` " + yearString;
 
             stmt.executeUpdate(query);
             Date dateR = (Date) widgetValues.get(InvoiceConstants.INV_DATE_KEY);
@@ -201,9 +210,9 @@ public class DatabaseManager {
                     + "'0' ," + "'" + widgetValues.get(InvoiceConstants.GRAND_TOTAL_KEY) + "','"
                     + widgetValues.get(InvoiceConstants.TAX_TYPE_KEY) + "','"
                     + widgetValues.get(InvoiceConstants.FORM_C_KEY) + "','"
-                    +widgetValues.get(InvoiceConstants.REMARKS_KEY)
-                    +"')";
-         
+                    + widgetValues.get(InvoiceConstants.REMARKS_KEY)
+                    + "')";
+
             //CREATE TRIGGER one_invno_per_finyear
             //BEFORE INSERT ON Invoices FOR EACH ROW
             //BEGIN
@@ -219,18 +228,18 @@ public class DatabaseManager {
             //SELECT 
             System.out.println(query);
             stmt.executeUpdate(query);
-            query="SELECT LAST_INSERT_ID()";
-            rs=stmt.executeQuery(query);
-            Integer lastInsertID=-1;
-            if(rs.next()){
-            lastInsertID=rs.getInt(1);
+            query = "SELECT LAST_INSERT_ID()";
+            rs = stmt.executeQuery(query);
+            Integer lastInsertID = -1;
+            if (rs.next()) {
+                lastInsertID = rs.getInt(1);
             }
             for (ArrayList row : (ArrayList<ArrayList>) widgetValues.get(InvoiceConstants.ITEM_LIST_KEY)) {
 
                 query = "INSERT INTO `Particulars` (`invoiceID`,`productID`,`quantity`,`price`)"
                         + " VALUES ("
-                        +"'"+lastInsertID+"'," 
-                       // + "'" + widgetValues.get(InvoiceConstants.INV_NO_KEY) + "',"
+                        + "'" + lastInsertID + "',"
+                        // + "'" + widgetValues.get(InvoiceConstants.INV_NO_KEY) + "',"
                         + "'" + productMap.get(row.get(InvoiceConstants.DESC_COL)) + "',"
                         + "'" + row.get(InvoiceConstants.QTY_COL) + "',"
                         + "'" + row.get(InvoiceConstants.PRICE_COL) + "')";
@@ -242,26 +251,34 @@ public class DatabaseManager {
             ex.printStackTrace();
         }
     }
- public void loadValuesIntoProductMap(Connection conn,HashMap<String, Integer> productMap){
-     
- }
+
+    public void loadValuesIntoProductMap(Connection conn, HashMap<String, Integer> productMap) {
+
+    }
+
     public void loadValuesIntoHashMapFromDB(Connection conn, HashMap widgetValues, HashMap<String, Integer> productMap, HashMap<String, Integer> buyerMap) {
         try {
-
+String yearString = "";
+            if (InvoiceConstants.FIN_YEAR_FIRST_PART <= 0) {
+                return;//yearLabel = new JLabel("Financial Year : None Selected");
+            } else {
+                yearString = "BETWEEN '" + InvoiceConstants.FIN_YEAR_FIRST_PART + "-04-01' AND '" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1) + "-03-31' ";
+            }
             Statement stmt = conn.createStatement();
 
             String query = "SELECT * FROM `Invoices` WHERE `invno` = " + "'"
-                    + widgetValues.get(InvoiceConstants.INV_NO_KEY) + "'";
+                    + widgetValues.get(InvoiceConstants.INV_NO_KEY) + "'"+
+                    "AND `invdate`"+yearString;
             ResultSet rs = stmt.executeQuery(query);
             //  query.exec_(s);
-        Integer InvoiceID=0;
+            Integer InvoiceID = -1;
             if (rs.next()) {
                 //int result = JOptionPane.showConfirmDialog(null, "Invoice no already exists. Overwrite?");
                 //if (result != JOptionPane.YES_OPTION) {
                 //   return;
                 //}
                 //`buyerID`,`cstrate`,`scrate`, `bill_value`,`tax_type`,`form_c`
-                InvoiceID=rs.getInt("InvoiceID");
+                InvoiceID = rs.getInt("InvoiceID");
                 widgetValues.put(InvoiceConstants.INV_NO_KEY, String.valueOf(rs.getInt("invno")));
                 widgetValues.put(InvoiceConstants.INV_DATE_KEY, rs.getDate("invdate"));
                 widgetValues.put(InvoiceConstants.BUYER_ID_KEY, rs.getInt("buyerID"));
@@ -269,9 +286,9 @@ public class DatabaseManager {
                 widgetValues.put(InvoiceConstants.TAX_RATE_KEY, rs.getDouble("cstrate"));
                 widgetValues.put(InvoiceConstants.TAX_TYPE_KEY, rs.getString(("tax_type")));
                 widgetValues.put(InvoiceConstants.FORM_C_KEY, rs.getString(("form_c")));
-                 widgetValues.put(InvoiceConstants.REMARKS_KEY, rs.getString(("remarks")));
+                widgetValues.put(InvoiceConstants.REMARKS_KEY, rs.getString(("remarks")));
 
-            }else{
+            } else {
                 return;
             }
 

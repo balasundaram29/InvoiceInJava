@@ -16,6 +16,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -23,6 +25,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -32,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -66,6 +71,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
     Connection conn = null;
     JTable salesTable = null;
     SalesTableModel tableModel = null;
+    private JLabel yearLabel;
     JTextField invoiceNoTextField;
     JDateChooser dChooser;
     JComboBox buyerCombo;
@@ -100,17 +106,36 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         super(new MigLayout(
                 "", // Layout Constraints
                 "[][grow][][grow,right]", // Column constraints
-                "[top]25[top]" // Row constraints
+                "[top]20[top]" // Row constraints
         ));
+
         conn = DBUtilities.getConnection();
+        if (InvoiceConstants.FIN_YEAR_FIRST_PART <= 0) {
+            InvoiceConstants.setFinYearFromDB();
+        }
+
         fillProductAndBuyerLists();
+
+        if (InvoiceConstants.FIN_YEAR_FIRST_PART <= 0) {
+            yearLabel = new JLabel("Financial Year : None Selected");
+        } else {
+            yearLabel = new JLabel("Financial Year : " + InvoiceConstants.FIN_YEAR_FIRST_PART + "-" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1));
+        }
+
+        add(yearLabel, "grow,wrap");
         JLabel label;
         label = new JLabel("Invoice No :");
         invoiceNoTextField = new JTextField();
+        //if no financial year selected get the maximum financial year
+
         invoiceNoTextField.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (InvoiceConstants.FIN_YEAR_FIRST_PART <= 0) {
+                    JOptionPane.showMessageDialog(null, "There are no  financial years available.\n Create/Select  financial year using Edit->Manage Years MenuItem.");
+                    return;
+                }
                 loadValuesFromHashMaps();
             }
         });
@@ -120,6 +145,63 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         label = new JLabel("Date :");
         add(label, "gap unrelated");
         dChooser = new JDateChooser(new Date(), "dd-MM-yyyy");
+
+        dChooser.getDateEditor().addPropertyChangeListener(
+                new PropertyChangeListener() {
+                    @Override
+                    public void propertyChange(PropertyChangeEvent e) {
+
+                        if ("date".equals(e.getPropertyName())) {
+                            if (InvoiceConstants.FIN_YEAR_FIRST_PART <= 0) {
+                                Date newDate = (Date) e.getNewValue();
+                                System.out.println("date new value is" + newDate);
+                                System.out.println("date new Date is" + new Date());
+                                JOptionPane.showMessageDialog(null, "There are no financial years available.\nCreate/Select  financial year using Edit->Manage Years MenuItem.");
+                                //
+                                SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMdd");
+                                if (sdf1.format(newDate).equals(sdf1.format(new Date()))) {
+                                    return;
+                                }
+                                // if (newDate.compareTo(new Date()) == 0) {
+                                //   return;
+                                //}
+                                dChooser.setDate(new Date());
+                            }
+                            System.out.println(e.getPropertyName()
+                                    + ": " + (Date) e.getNewValue());
+                            Date newDate = (Date) e.getNewValue();
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+                            Date firstDate = null;
+                            Date lastDate = null;
+                            try {
+                                firstDate = sdf.parse("01-04-" + InvoiceConstants.FIN_YEAR_FIRST_PART);
+
+                                lastDate = sdf.parse("31-03-" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1));
+                            } catch (Exception ex) {
+                                Logger.getLogger(InvoiceEditWidget.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            if (newDate.before(firstDate) || newDate.after(lastDate)) {
+                                JOptionPane.showMessageDialog(null, "The selected date is outside the currently active financial year "
+                                        + InvoiceConstants.FIN_YEAR_FIRST_PART + "-" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1) + "."
+                                        + "Select date in the financial year " + InvoiceConstants.FIN_YEAR_FIRST_PART + "-" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1) + "."
+                                        + "\n Or create/select correct financial year using Edit->Manage Years MenuItem.");
+                                dChooser.setDate(firstDate);
+
+                            }
+
+                        }
+                    }
+                });
+
+        try {
+            // dChooser.setSelectableDateRange(new SimpleDateFormat("DD-MM-YYYY").parse("01-04-" + (InvoiceConstants.FIN_YEAR_FIRST_PART)),
+            //       new SimpleDateFormat("DD-MM-YYYY").parse("31-03-" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1)));
+            //System.out.println("Fianacial Year fp " + Integer.toString(InvoiceConstants.FIN_YEAR_FIRST_PART));
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Logger.getLogger(InvoiceEditWidget.class.getName()).log(Level.SEVERE, null, ex);
+        }
         add(dChooser, "grow,wrap");
         label = new JLabel("Buyer :");
 
@@ -182,6 +264,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         });
         removeButton = new JButton("Remove Item");
         add(removeButton);
+        removeButton.setIcon(new ImageIcon(this.getClass().getResource("remove24.png")));
         removeButton.addActionListener(new ActionListener() {
 
             @Override
@@ -248,6 +331,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         add(new JLabel(" "));//dummy
         addButton = new JButton("Add Item");
         addButton.addActionListener(new AddButtonListener());
+        addButton.setIcon(new ImageIcon(this.getClass().getResource("add24.png")));
         add(addButton, "wrap");
         // "cell column row width height"  cell 3 2 50 20,
 
@@ -321,8 +405,10 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         add(totalTextField, "grow,wrap,right");
         viewAllButton = new JButton("View all Invoices");
         add(viewAllButton);
+        viewAllButton.setIcon(new ImageIcon(this.getClass().getResource("viewall24.png")));
         printXLButton = new JButton("Print In Excel");
         add(printXLButton);
+        printXLButton.setIcon(new ImageIcon(this.getClass().getResource("print24.png")));
         printXLButton.addActionListener(new ActionListener() {
 
             @Override
@@ -344,7 +430,9 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         deleteButton = new JButton("Delete");
         deleteButton.addActionListener(new DeleteButtonListener());
         add(deleteButton);
+        deleteButton.setIcon(new ImageIcon(this.getClass().getResource("delete24.png")));
         saveButton = new JButton("Save");
+        saveButton.setIcon(new ImageIcon(this.getClass().getResource("save24.png")));
         saveButton.addActionListener(new SaveButtonListener());
         add(saveButton);
         populateWidgets();
@@ -354,16 +442,27 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
 
     public void populateWidgets() {
         try {
-                    String q = "SELECT MAX(`invno`) from `Invoices`";// WHERE `name`=" + "\'" + (String) buyerCombo.getSelectedItem() + "\'";
-                    Statement s = conn.createStatement();
-                    ResultSet rs = s.executeQuery(q);
-                    if (rs.next()) {
-                        invoiceNoTextField.setText(Integer.toString(rs.getInt(1)+1));
-                    }
-                } catch (SQLException ex) {
-                    Logger.getLogger(InvoiceEditWidget.class.getName()).log(Level.SEVERE, null, ex);
-                }
-       // invoiceNoTextField.setText("112");
+            String yearString = "";
+            if (InvoiceConstants.FIN_YEAR_FIRST_PART <= 0) {
+                return;//yearLabel = new JLabel("Financial Year : None Selected");
+            } else {
+                yearString = "BETWEEN '" + InvoiceConstants.FIN_YEAR_FIRST_PART + "-04-01' AND '" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1) + "-03-31' ";
+            }
+
+            String q = "SELECT MAX(`invno`) from `Invoices` WHERE `invdate` " + yearString;// WHERE `name`=" + "\'" + (String) buyerCombo.getSelectedItem() + "\'";
+            Statement s = conn.createStatement();
+            ResultSet rs = s.executeQuery(q);
+            int i = 0;
+            if (rs.next()) {
+                i = rs.getInt(1);
+                invoiceNoTextField.setText(Integer.toString(i + 1));
+                refresh();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            Logger.getLogger(InvoiceEditWidget.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        // invoiceNoTextField.setText("112");
         //taxRateTextField.setText("5.5");
     }
 
@@ -372,7 +471,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
             this.tableItemsList = new ArrayList<ArrayList>();
             this.tableModel.fireTableDataChanged();
             this.taxRateTextField.setText("0.00");
-            this.dChooser.setDate(new Date());
+            //  this.dChooser.setDate(new Date());
             this.totalTextField.setText("0");
             return;
 
@@ -381,7 +480,28 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         widgetValues.put(InvoiceConstants.INV_NO_KEY, invoiceNoTextField.getText());
         new DatabaseManager().loadValuesIntoHashMapFromDB(conn, widgetValues, productMap, buyerMap);
         if (widgetValues.get(InvoiceConstants.INV_DATE_KEY) == null) {
-            dChooser.setDate(new Date());
+           // dChooser.setDate(new Date());
+            Date firstDate = null;
+            Date lastDate = null;
+            Date newDate = null;
+            try {
+                newDate = new Date();
+
+                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+                firstDate = sdf.parse("01-04-" + InvoiceConstants.FIN_YEAR_FIRST_PART);
+
+                lastDate = sdf.parse("31-03-" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1));
+            } catch (Exception ex) {
+                Logger.getLogger(InvoiceEditWidget.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (newDate.before(firstDate) || newDate.after(lastDate)) {
+
+                dChooser.setDate(firstDate);
+
+            } else {
+                dChooser.setDate(newDate);
+            }
+
         } else {
             dChooser.setDate((Date) widgetValues.get(InvoiceConstants.INV_DATE_KEY));
         }
@@ -410,11 +530,11 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         } else {
             formCCheckBox.setSelected(false);
         }
-        if(widgetValues.get(InvoiceConstants.REMARKS_KEY)==null){
+        if (widgetValues.get(InvoiceConstants.REMARKS_KEY) == null) {
             remarksField.setText("");
-        }else{
-             c= widgetValues.get(InvoiceConstants.REMARKS_KEY) + "";
-             remarksField.setText(c);
+        } else {
+            c = widgetValues.get(InvoiceConstants.REMARKS_KEY) + "";
+            remarksField.setText(c);
         }
         //if (tableItemsList != null && tableItemsList.size() != 0) {
         computeTotal();
@@ -454,6 +574,31 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
                 buyerCombo.addItem(bname);
             }
 
+        }
+
+    }
+
+    public void changeFinancialYear() {
+        yearLabel.setText("Financial Year : " + InvoiceConstants.FIN_YEAR_FIRST_PART + "-" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1));
+        Date firstDate = null;
+        Date lastDate = null;
+        Date newDate = null;
+        try {
+            newDate = new Date();
+
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+            firstDate = sdf.parse("01-04-" + InvoiceConstants.FIN_YEAR_FIRST_PART);
+
+            lastDate = sdf.parse("31-03-" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1));
+        } catch (Exception ex) {
+            Logger.getLogger(InvoiceEditWidget.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (newDate.before(firstDate) || newDate.after(lastDate)) {
+
+            dChooser.setDate(firstDate);
+
+        } else {
+            dChooser.setDate(newDate);
         }
 
     }
@@ -737,7 +882,10 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-
+            if (InvoiceConstants.FIN_YEAR_FIRST_PART <= 0) {
+                JOptionPane.showMessageDialog(null, "There are no financial years available.\nCreate/Select  financial year using Edit->Manage Years MenuItem.");
+                return;
+            }
             ArrayList l = new ArrayList<Object>();
             //the saved value table_row_count  is not used ;
             //saved just for postional correspondence of arraylist with table
@@ -756,6 +904,36 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            try {
+                if (InvoiceEditWidget.this.invoiceNoTextField.getText() == null
+                        || invoiceNoTextField.getText().trim() == "" || Integer.parseInt(invoiceNoTextField.getText()) <= 0) {
+                    JOptionPane.showMessageDialog(null, "Cannot save.The Invoice No. should be  positive integer.\n Enter correct Invoice No. before saving.");
+                    return;
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Cannot save. The Invoice No. should be  positive integer.\n Enter correct Invoice No. before saving.");
+                return;
+            }
+            Date newDate = (Date) dChooser.getDate();
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+            Date firstDate = null;
+            Date lastDate = null;
+            try {
+                firstDate = sdf.parse("01-04-" + InvoiceConstants.FIN_YEAR_FIRST_PART);
+
+                lastDate = sdf.parse("31-03-" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1));
+            } catch (Exception ex) {
+                Logger.getLogger(InvoiceEditWidget.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (newDate.before(firstDate) || newDate.after(lastDate)) {
+                JOptionPane.showMessageDialog(null, "The selected date is outside the currently active financial year "
+                        + InvoiceConstants.FIN_YEAR_FIRST_PART + "-" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1) + "."
+                        + "Select date in the financial year " + InvoiceConstants.FIN_YEAR_FIRST_PART + "-" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1) + "."
+                        + "\n Or create/select correct financial year using Edit->Manage Years MenuItem.");
+                // dChooser.setDate(firstDate);
+                return;
+
+            }
             fillUpMapsFromDisplayedValues();
             new DatabaseManager().saveValues(conn, widgetValues, productMap);
         }
@@ -765,6 +943,9 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            if (JOptionPane.showConfirmDialog(null, "Delete this invoice (Invoice No.: " + Integer.valueOf(invoiceNoTextField.getText()) + ")?", "Confirm deletion", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+                return;
+            };
             new DatabaseManager().deleteInvoice(conn, Integer.valueOf(invoiceNoTextField.getText()));
             loadValuesFromHashMaps();
         }
@@ -786,4 +967,14 @@ class SalesTable extends JTable {
             editor.requestFocusInWindow();
         }
     }
+}
+
+class InvoicDateChooser extends JDateChooser {
+
+    @Override
+    public void actionPerformed(ActionEvent ae) {
+        //To change body of generated methods, choose Tools | Templates.
+        // getd
+    }
+
 }

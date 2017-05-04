@@ -17,6 +17,7 @@ FROM
 WHERE
     `Invoices`.`invoiceID` = `Particulars`.`invoiceID`
         AND `Particulars`.`productID` = `Products`.`productID`
-        AND `Invoices`.`buyerID` = `Buyers`.`buyerID`;
+        AND `Invoices`.`buyerID` = `Buyers`.`buyerID`
+ORDER BY `Invoices`.`invno`;
 
    

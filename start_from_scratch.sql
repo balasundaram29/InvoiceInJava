@@ -48,6 +48,11 @@ CREATE TABLE IF NOT EXISTS Particulars (
         REFERENCES Products (productID)
 )  ENGINE=INNODB;
 
+#for financial year 2017-2018 the saved finYearFirstPart is 2017.
+CREATE TABLE IF NOT EXISTS Years (
+finYearFirstPart INTEGER PRIMARY KEY
+)  ENGINE=INNODB;
+   
 
 INSERT INTO `InvoiceDB`.`Products` (`name`, `unit`) VALUES ('0.5 HP Single Phase Openwell Submersible Pumpset', 'Nos');
 INSERT INTO `InvoiceDB`.`Products` (`name`, `unit`) VALUES ('0.5 HP Single Phase Monoblock Pumpset', 'Nos');

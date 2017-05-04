@@ -2,6 +2,7 @@ package print.spreadsheet;
 
 //import com.sun.java.swing.plaf.nimbus.SliderPainter;
 import bala.invoice.gui.InvoiceConstants;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -10,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 //import javax.swing.border.Border;
 import jxl.Range;
@@ -199,11 +201,14 @@ public class PrintManager {
                             false, Alignment.LEFT, false, true, false, false, "");
 
                 }
-                File file = new File("cris.png");
-                if (file.exists()) {
-                    WritableImage image = new WritableImage(0, 2, 2.5, 3.75, new File("cris.png"));
+                File file =new File("ok.png");
+                if (!file.exists()) {
+                    BufferedImage im=ImageIO.read(this.getClass().getResource("cris.png"));//
+                    ImageIO.write(im, "png", new File("ok.png"));
+                    }   
+                    WritableImage image = new WritableImage(0, 2, 2.5, 3.75,new File("ok.png"));
                     sheet.addImage(image);
-                }
+              
 
                 mergeCellsCreateAndAddLabelWithBorders(COMP_NAME_COL, COMP_NAME_ROW,
                         RIGHTMOST_COL, COMP_NAME_ROW, sheet, 22, true, Alignment.CENTRE,

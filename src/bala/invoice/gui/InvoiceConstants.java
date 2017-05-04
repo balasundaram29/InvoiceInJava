@@ -1,6 +1,13 @@
 package bala.invoice.gui;
 
+import bala.invoice.db.DBUtilities;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*
  * To change this template, choose Tools | Templates
@@ -37,7 +44,29 @@ public class InvoiceConstants {
     public static int PRICE_COL = 3;
     public static int AMOUNT_COL = 4;
     public static int TOTAL_COLS = 5;
+    public static int FIN_YEAR_FIRST_PART=-1;
+    
    // public static 
 //HashMap<String, Integer> productMap = null;// new HashMap<String, Integer>();
   //  HashMap<String, Integer> buyerMap = null;
+    public static void setFinYear(int year){
+        FIN_YEAR_FIRST_PART=year;
+    } 
+    public static void setFinYearFromDB(){
+        try {
+            Connection conn = DBUtilities.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(
+                    "SELECT MAX(`finYearFirstPart`) FROM `Years`");
+            if (rs.next()) {
+                int year = (int) rs.getInt(1);
+                 System.out.println("IC:Financial Year is"+year) ;
+               
+                setFinYear(year);
+
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(InvoiceConstants.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }

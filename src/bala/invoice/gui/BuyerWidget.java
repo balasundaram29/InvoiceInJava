@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -45,6 +46,7 @@ public class BuyerWidget extends JPanel {
     private JButton refreshButton;
     private JButton backButton, addButton;
     private JTable table;
+    private DefaultTableModel model;
     //in model frame used for editing
     private JTextField nameField, theTINNoField, theCSTField, emailField;//= new JTextField();
     private JTextArea addrArea;
@@ -61,7 +63,10 @@ public class BuyerWidget extends JPanel {
         try {
 
             backButton = new JButton("Back To Sales Entry");
-            addButton = new JButton("Add Buyer");
+            backButton.setIcon(new ImageIcon(this.getClass().getResource("back24.png")));
+
+            addButton = new JButton("Add A New Buyer");
+            addButton.setIcon(new ImageIcon(this.getClass().getResource("new_icon24.png")));
             addButton.addActionListener(new ActionListener() {
 
                 @Override
@@ -76,33 +81,18 @@ public class BuyerWidget extends JPanel {
             });
 
             refreshButton = new JButton("Refresh");
+            refreshButton.setIcon(new ImageIcon(this.getClass().getResource("refresh24.png")));
             refreshButton.addActionListener(new ActionListener() {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    try {
-                        // loadListFromDB();
-                        Connection conn = DBUtilities.getConnection();
-                        Statement stmt = conn.createStatement();
-                        ResultSet rs = stmt.executeQuery(
-                                "SELECT `buyerID`,`name`, `address` FROM `buyers` ORDER BY `name`");
-                        //+ " INNER JOIN `buyers` ON `invoices`.`buyerID`=`buyers`.`buyerID`");
-                        Object[] columnNamesArray = {"BuyerID", "Name", "Address"};
-                        DefaultTableModel model = DBUtilities.buildTableModel(rs, columnNamesArray);
-                        table.setModel(model);
-                    } catch (Exception ex) {
-                        Logger.getLogger(BuyerWidget.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    createTableModel();
+                    table.setModel(model);
                 }
             });
-            Connection conn = DBUtilities.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(
-                    "SELECT `buyerID`,`name`, `address` FROM `buyers` ORDER BY `name`");
-            //+ " INNER JOIN `buyers` ON `invoices`.`buyerID`=`buyers`.`buyerID`");
-            Object[] columnNamesArray = {"BuyerID", "Name", "Address"};
-            DefaultTableModel model = DBUtilities.buildTableModel(rs, columnNamesArray);
+           createTableModel();
             table = new JTable(model);
+           
             table.setColumnSelectionAllowed(false);
             JScrollPane scroller = new JScrollPane(table);
             table.setFillsViewportHeight(true);
@@ -111,9 +101,7 @@ public class BuyerWidget extends JPanel {
             add(backButton);
             add(addButton);
             add(refreshButton);
-        } catch (ColumnNamesCountIncorrectException ex) {
-            Logger.getLogger(InvoiceListWidget.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
+        }catch (Exception ex) {
             ex.printStackTrace();
             Logger.getLogger(InvoiceListWidget.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -163,6 +151,22 @@ public class BuyerWidget extends JPanel {
         this.refreshButton.doClick();
     }
 
+    public void createTableModel() {
+        try {
+            // loadListFromDB();
+            Connection conn = DBUtilities.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(
+                    "SELECT `buyerID`,`name`, `address` FROM `buyers` ORDER BY `name`");
+            //+ " INNER JOIN `buyers` ON `invoices`.`buyerID`=`buyers`.`buyerID`");
+            Object[] columnNamesArray = {"BuyerID", "Name", "Address"};
+            model = DBUtilities.buildTableModel(rs, columnNamesArray);
+            
+        } catch (Exception ex) {
+            Logger.getLogger(BuyerWidget.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     public void createEditPane() {
         editPane = new JPanel();
         editPane.setLayout(new MigLayout(
@@ -190,6 +194,7 @@ public class BuyerWidget extends JPanel {
         theCSTField = new JTextField();
         editPane.add(theCSTField, "grow,wrap,span");
         saveButton = new JButton("Save");
+        saveButton.setIcon(new ImageIcon(this.getClass().getResource("save24.png")));
         saveButton.addActionListener(new ActionListener() {
 
             @Override
@@ -231,12 +236,15 @@ public class BuyerWidget extends JPanel {
         });
         editPane.add(saveButton);
         deleteButton = new JButton("Delete");
-
+        deleteButton.setIcon(new ImageIcon(this.getClass().getResource("delete24.png")));
         deleteButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
+                    if (JOptionPane.showConfirmDialog(null, "Delete this Buyer (Buyer Name : " + nameField.getText() + ")?", "Confirm deletion", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+                        return;
+                    };
                     Connection conn = DBUtilities.getConnection();
                     Statement stmt = conn.createStatement();
                     stmt.executeUpdate("SET AUTOCOMMIT=0");

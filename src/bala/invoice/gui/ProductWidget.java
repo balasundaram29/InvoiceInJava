@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -45,6 +46,7 @@ public class ProductWidget extends JPanel {
     private JButton refreshButton;
     private JButton backButton, addButton;
     private JTable table;
+    private DefaultTableModel model;
     //in model frame used for editing
     private JTextField nameField, typeField, unitField, emailField;//= new JTextField();
     // private JTextArea addrArea;
@@ -61,7 +63,11 @@ public class ProductWidget extends JPanel {
         try {
 
             backButton = new JButton("Back To Sales Entry");
-            addButton = new JButton("Add Product");
+            backButton.setIcon(new ImageIcon(this.getClass().getResource("back24.png")));
+            backButton.setIcon(new ImageIcon(this.getClass().getResource("back24.png")));
+            addButton = new JButton("Add A New Product");
+            addButton.setIcon(new ImageIcon(this.getClass().getResource("new_icon24.png")));
+
             addButton.addActionListener(new ActionListener() {
 
                 @Override
@@ -77,32 +83,20 @@ public class ProductWidget extends JPanel {
             });
 
             refreshButton = new JButton("Refresh");
+            refreshButton.setIcon(new ImageIcon(this.getClass().getResource("refresh24.png")));
             refreshButton.addActionListener(new ActionListener() {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
-                        // loadListFromDB();
-                        Connection conn = DBUtilities.getConnection();
-                        Statement stmt = conn.createStatement();
-                        ResultSet rs = stmt.executeQuery(
-                                "SELECT `productID`,`name`,`type`, `unit` FROM `products` ORDER BY `name`");
-                        //+ " INNER JOIN `products` ON `invoices`.`productID`=`products`.`productID`");
-                        Object[] columnNamesArray = {"ProductID", "Name", "Type", "Unit"};
-                        DefaultTableModel model = DBUtilities.buildTableModel(rs, columnNamesArray);
+                       createTableModel();
                         table.setModel(model);
                     } catch (Exception ex) {
                         Logger.getLogger(ProductWidget.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             });
-            Connection conn = DBUtilities.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(
-                    "SELECT `productID`,`name`,`type`,`unit` FROM `products` ORDER BY `name`");
-            //+ " INNER JOIN `products` ON `invoices`.`productID`=`products`.`productID`");
-            Object[] columnNamesArray = {"ProductID", "Name", "Type", "Unit"};
-            DefaultTableModel model = DBUtilities.buildTableModel(rs, columnNamesArray);
+            createTableModel();
             table = new JTable(model);
             table.setColumnSelectionAllowed(false);
             JScrollPane scroller = new JScrollPane(table);
@@ -112,9 +106,7 @@ public class ProductWidget extends JPanel {
             add(backButton);
             add(addButton);
             add(refreshButton);
-        } catch (ColumnNamesCountIncorrectException ex) {
-            Logger.getLogger(InvoiceListWidget.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
+        }  catch (Exception ex) {
             ex.printStackTrace();
             Logger.getLogger(InvoiceListWidget.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -163,7 +155,20 @@ public class ProductWidget extends JPanel {
     public void refresh() {
         refreshButton.doClick();
     }
-
+    public void createTableModel(){
+        try {
+            Connection conn = DBUtilities.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(
+                    "SELECT `productID`,`name`,`type`, `unit` FROM `products` ORDER BY `name`");
+            //+ " INNER JOIN `products` ON `invoices`.`productID`=`products`.`productID`");
+            Object[] columnNamesArray = {"ProductID", "Name", "Type", "Unit"};
+             model = DBUtilities.buildTableModel(rs, columnNamesArray);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Logger.getLogger(ProductWidget.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     public void createEditPane() {
         editPane = new JPanel();
         editPane.setLayout(new MigLayout(
@@ -186,6 +191,7 @@ public class ProductWidget extends JPanel {
         unitField = new JTextField();
         editPane.add(unitField, "grow,wrap,span");
         saveButton = new JButton("Save");
+        saveButton.setIcon(new ImageIcon(this.getClass().getResource("save24.png")));
         saveButton.addActionListener(new ActionListener() {
 
             @Override
@@ -212,7 +218,7 @@ public class ProductWidget extends JPanel {
                                 + nameField.getText() + "','" + typeField.getText() + "','" + unitField.getText() + "')";
                     } else {
                         query = " UPDATE  `products` SET  `name`='" + nameField.getText() + "',`type`='" + typeField.getText() + "',`unit`='"
-                                + unitField.getText() + "'" + " WHERE `name`='" + savedName+ "'";
+                                + unitField.getText() + "'" + " WHERE `name`='" + savedName + "'";
                         // System.out.println(query);
                     }
                     System.out.println(query);
@@ -228,12 +234,16 @@ public class ProductWidget extends JPanel {
         });
         editPane.add(saveButton);
         deleteButton = new JButton("Delete");
+        deleteButton.setIcon(new ImageIcon(this.getClass().getResource("delete24.png")));
 
         deleteButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
+                    if (JOptionPane.showConfirmDialog(null, "Delete this Product (Product Name : " + nameField.getText() + ")?", "Confirm deletion", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+                        return;
+                    };
                     Connection conn = DBUtilities.getConnection();
                     Statement stmt = conn.createStatement();
                     stmt.executeUpdate("SET AUTOCOMMIT=0");

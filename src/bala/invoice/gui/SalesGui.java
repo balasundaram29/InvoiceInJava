@@ -69,6 +69,7 @@ public class SalesGui extends JFrame implements WindowListener {
     InvoiceListWidget invoiceListWidget;
     BuyerWidget buyerWidget;
     ProductWidget productWidget;
+    YearWidget yearWidget;
 
     JTable table;
     // buyerDict={}
@@ -76,12 +77,26 @@ public class SalesGui extends JFrame implements WindowListener {
     public SalesGui() {
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
+        JMenuItem newInvMenuItem = new JMenuItem("New Invoice");
+        fileMenu.add(newInvMenuItem);
+        newInvMenuItem.addActionListener(
+                ae -> {
+                    if (JOptionPane.showConfirmDialog(null, "Proceed to new Invoice? Click 'Yes' only if you have no unsaved work.", "New Invoice", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+                        return;
+                    }
+                    invoiceEditWidget.populateWidgets();
+                    invoiceEditWidget.loadValuesFromHashMaps();
+                }
+        //ae->System.out.println("");
+        //JOptionPane.showConfirmDialog(null,"", null, WIDTH);
+        );
         JMenu editMenu = new JMenu("Edit");
         JMenuItem productMenuItem = new JMenuItem("Manage Products");
         editMenu.add(productMenuItem);
         JMenuItem buyerMenuItem = new JMenuItem("Manage Buyers");
         editMenu.add(buyerMenuItem);
-
+        JMenuItem yearMenuItem = new JMenuItem("Manage Years");
+        editMenu.add(yearMenuItem);
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
         setJMenuBar(menuBar);
@@ -122,13 +137,13 @@ public class SalesGui extends JFrame implements WindowListener {
                 //SalesGui.this.getContentPane().removeAll();
                 //SalesGui.this.getContentPane().invalidate();
                 //invoiceEditWidget=new InvoiceEditWidget();
-               // SalesGui.this.setContentPane(invoiceEditWidget);
-               // SalesGui.this.validate();
+                // SalesGui.this.setContentPane(invoiceEditWidget);
+                // SalesGui.this.validate();
                 //SalesGui.this.repaint();
-               // invoiceEditWidget = new InvoiceEditWidget();
+                // invoiceEditWidget = new InvoiceEditWidget();
                 //setContentPane(invoiceEditWidget);
                 //validate();
-               
+
                 SalesGui.this.setContentPane(invoiceEditWidget);
                 SalesGui.this.validate();
             }
@@ -138,7 +153,7 @@ public class SalesGui extends JFrame implements WindowListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-               // SalesGui.this.getContentPane().removeAll();
+                // SalesGui.this.getContentPane().removeAll();
                 //SalesGui.this.getContentPane().invalidate();
                 //invoiceListWidget= new InvoiceListWidget();
                 invoiceListWidget.refresh();
@@ -201,8 +216,8 @@ public class SalesGui extends JFrame implements WindowListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-               // invoiceEditWidget = new InvoiceEditWidget();
-                 invoiceEditWidget.refresh();
+                // invoiceEditWidget = new InvoiceEditWidget();
+                invoiceEditWidget.refresh();
                 SalesGui.this.setContentPane(invoiceEditWidget);
                 SalesGui.this.validate();
             }
@@ -224,30 +239,50 @@ public class SalesGui extends JFrame implements WindowListener {
 
                 //invoiceEditWidget = new InvoiceEditWidget();
                 // invoiceEditWidget.fillProductAndBuyerLists();
-                   invoiceEditWidget.refresh();
+                invoiceEditWidget.refresh();
                 SalesGui.this.setContentPane(invoiceEditWidget);
                 SalesGui.this.validate();
             }
         });
+        yearWidget = new YearWidget();
+        yearMenuItem.addActionListener(new ActionListener() {
 
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setContentPane(yearWidget);
+                validate();
+            }
+        });
+        yearWidget.getBackButton().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                //invoiceEditWidget = new InvoiceEditWidget();
+                // invoiceEditWidget.fillProductAndBuyerLists();
+                invoiceEditWidget.refresh();
+                SalesGui.this.setContentPane(invoiceEditWidget);
+                SalesGui.this.validate();
+            }
+        });
     }
 
     public static void main(String[] args) {
         //DatabaseManager.createDatabaseAndTables();
         //DatabaseManager.createTriggersOnly(DBUtilities.getConnection());
-       try {
-        /*String databaseName = "InvoiceDB";
-            String userName = "root";
-            String password = "";
+        try {
+            /*String databaseName = "InvoiceDB";
+             String userName = "root";
+             String password = "";
 
-            String url = "jdbc:mysql://localhost:3306/mysql?zeroDateTimeBehavior=convertToNull";
-            Connection connection = DriverManager.getConnection(url, userName, password);
-            // Give the input file to Reader
-			Reader reader = new BufferedReader(
-                               new FileReader("InvoiceDBWithTriggers.sql"));
-           ScriptRunner scriptRunner=new ScriptRunner(connection,false,true);
-           scriptRunner.runScript(reader);
-       */
+             String url = "jdbc:mysql://localhost:3306/mysql?zeroDateTimeBehavior=convertToNull";
+             Connection connection = DriverManager.getConnection(url, userName, password);
+             // Give the input file to Reader
+             Reader reader = new BufferedReader(
+             new FileReader("InvoiceDBWithTriggers.sql"));
+             ScriptRunner scriptRunner=new ScriptRunner(connection,false,true);
+             scriptRunner.runScript(reader);
+             */
             for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     UIManager.setLookAndFeel(info.getClassName());
@@ -258,7 +293,7 @@ public class SalesGui extends JFrame implements WindowListener {
             e.printStackTrace();
             // If Nimbus is not available, you can set the GUI to another look and feel.
         }
-       SwingUtilities.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
 
             @Override
             public void run() {
