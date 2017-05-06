@@ -6,10 +6,13 @@
         <group>
             <file>file:/E:/NetBeansProjects/InvoiceInJava/src/bala/invoice/gui/YearWidget.java</file>
             <file>file:/E:/NetBeansProjects/InvoiceInJava/src/bala/invoice/gui/InvoiceListWidget.java</file>
+            <file>file:/E:/NetBeansProjects/InvoiceInJava/nbproject/build-impl.xml</file>
             <file>file:/E:/NetBeansProjects/InvoiceInJava/src/bala/invoice/gui/BuyerWidget.java</file>
             <file>file:/E:/NetBeansProjects/InvoiceInJava/src/bala/invoice/db/DatabaseManager.java</file>
+            <file>file:/E:/NetBeansProjects/InvoiceInJava/src/bala/invoice/db/DBUtilities.java</file>
             <file>file:/E:/NetBeansProjects/InvoiceInJava/src/bala/invoice/gui/ProductWidget.java</file>
             <file>file:/E:/NetBeansProjects/InvoiceInJava/src/bala/invoice/gui/InvoiceEditWidget.java</file>
+            <file>file:/E:/NetBeansProjects/InvoiceInJava/src/bala/invoice/gui/SalesGui.java</file>
         </group>
     </open-files>
 </project-private>

@@ -35,7 +35,7 @@ public class DBUtilities {
         try {
             conn = DriverManager.getConnection(
                     "jdbc:" + "mysql" + "://"
-                    + "localhost"
+                    + "localhost" //locally use localhost;from office use 192.168.1.80(store win7 pc ip)
                     + ":" + "3306/" + "InvoiceDB",
                     connectionProps);
 

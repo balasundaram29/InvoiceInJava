@@ -80,12 +80,14 @@ public class SalesGui extends JFrame implements WindowListener {
         JMenuItem newInvMenuItem = new JMenuItem("New Invoice");
         fileMenu.add(newInvMenuItem);
         newInvMenuItem.addActionListener(
-                ae -> {
-                    if (JOptionPane.showConfirmDialog(null, "Proceed to new Invoice? Click 'Yes' only if you have no unsaved work.", "New Invoice", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
-                        return;
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent ae) {
+                        if (JOptionPane.showConfirmDialog(null, "Proceed to new Invoice? Click 'Yes' only if you have no unsaved work.", "New Invoice", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+                            return;
+                        }
+                        invoiceEditWidget.populateWidgets();
+                        invoiceEditWidget.loadValuesFromHashMaps();
                     }
-                    invoiceEditWidget.populateWidgets();
-                    invoiceEditWidget.loadValuesFromHashMaps();
                 }
         //ae->System.out.println("");
         //JOptionPane.showConfirmDialog(null,"", null, WIDTH);
