@@ -1,6 +1,5 @@
 package bala.invoice.db;
 
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -21,16 +20,17 @@ import javax.swing.table.DefaultTableModel;
  * @author ANNAIENG
  */
 public class DBUtilities {
-   static  Connection conn = null;
+
+    static Connection conn = null;
 
     public static Connection getConnection() {
 
-        if(conn!=null){
+        if (conn != null) {
             return conn;
         }
         Properties connectionProps = new Properties();
         connectionProps.put("user", "root");
-        connectionProps.put("password", "");
+        connectionProps.put("password", "bala");//no pass word from office
 
         try {
             conn = DriverManager.getConnection(
@@ -44,6 +44,18 @@ public class DBUtilities {
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
+        }
+    }
+
+    public static void closeConnections() {
+        if (conn == null) {
+            return;
+        }else{
+            try {
+                conn.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(DBUtilities.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
@@ -65,7 +77,7 @@ public class DBUtilities {
                 }
                 tableData.add(row);
             }
-            DefaultTableModel model = new DefaultTableModel(tableData,columnNames);
+            DefaultTableModel model = new DefaultTableModel(tableData, columnNames);
             return model;
 
         } catch (Exception ex) {
@@ -73,13 +85,14 @@ public class DBUtilities {
             return null;
         }
     }
-     public static DefaultTableModel buildTableModel(ResultSet rs,Object[] columnNamesArray)
-             throws ColumnNamesCountIncorrectException {
+
+    public static DefaultTableModel buildTableModel(ResultSet rs, Object[] columnNamesArray)
+            throws ColumnNamesCountIncorrectException {
         try {
             ResultSetMetaData meta = rs.getMetaData();
             Vector<Object> columnNames = new Vector<Object>();
-           int  cols = meta.getColumnCount();
-            if(cols != columnNamesArray.length){
+            int cols = meta.getColumnCount();
+            if (cols != columnNamesArray.length) {
                 throw new ColumnNamesCountIncorrectException("Number  of Column Names given is different from number "
                         + "of  columns in ResultSet ");
             }
@@ -97,8 +110,8 @@ public class DBUtilities {
                 }
                 tableData.add(row);
             }
-            
-            DefaultTableModel model = new DefaultTableModel(tableData,columnNames);
+
+            DefaultTableModel model = new DefaultTableModel(tableData, columnNames);
             return model;
 
         } catch (Exception ex) {

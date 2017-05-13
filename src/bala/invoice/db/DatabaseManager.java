@@ -149,11 +149,18 @@ public class DatabaseManager {
 
     public static void deleteInvoice(Connection conn, int invNo) {
         try {
+             String yearString = "";
+            if (InvoiceConstants.FIN_YEAR_FIRST_PART <= 0) {
+                return;//yearLabel = new JLabel("Financial Year : None Selected");
+            } else {
+                yearString = "BETWEEN '" + InvoiceConstants.FIN_YEAR_FIRST_PART + "-04-01' AND '" + (InvoiceConstants.FIN_YEAR_FIRST_PART + 1) + "-03-31' ";
+            }
             Statement stmt = conn.createStatement();
             stmt.executeUpdate("SET AUTOCOMMIT=0");
             stmt.executeUpdate("START TRANSACTION");
             String query = "DELETE   FROM `invoices` WHERE "
-                    + "`invno` = " + "\'" + invNo + "\'";
+                    + "`invno` = " + "\'" + invNo + "\'"+
+                    " AND `invdate` "+yearString ;
 
             stmt.executeUpdate(query);
             stmt.executeUpdate("COMMIT");

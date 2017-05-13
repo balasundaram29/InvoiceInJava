@@ -92,6 +92,9 @@ public class SalesGui extends JFrame implements WindowListener {
         //ae->System.out.println("");
         //JOptionPane.showConfirmDialog(null,"", null, WIDTH);
         );
+        JMenuItem exitMenuItem = new JMenuItem("Exit");
+        fileMenu.add(exitMenuItem);
+        exitMenuItem.addActionListener(new ExitListener());
         JMenu editMenu = new JMenu("Edit");
         JMenuItem productMenuItem = new JMenuItem("Manage Products");
         editMenu.add(productMenuItem);
@@ -119,7 +122,7 @@ public class SalesGui extends JFrame implements WindowListener {
             pack();
         }
         addWindowListener(this);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         setVisible(true);
         int cols = invoiceEditWidget.salesTable.getColumnCount();
@@ -269,13 +272,44 @@ public class SalesGui extends JFrame implements WindowListener {
         });
     }
 
+    public void saveFrameBounds() {
+        FileOutputStream fs = null;
+        ObjectOutputStream os = null;
+        try {
+
+            fs = new FileOutputStream("frame_bounds");
+            os = new ObjectOutputStream(fs);
+            Rectangle bounds = getBounds();//getSize();
+
+            os.writeObject(bounds);
+            int cols = invoiceEditWidget.salesTable.getColumnCount();
+            for (int col = 0; col < cols; col++) {
+                int i = invoiceEditWidget.salesTable.getColumnModel().getColumn(col).getWidth();
+                os.writeInt(i);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(SalesGui.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
+        } finally {
+            {
+                try {
+                    os.close();
+                    fs.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(SalesGui.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+        }
+    }
+
     public static void main(String[] args) {
         //DatabaseManager.createDatabaseAndTables();
         //DatabaseManager.createTriggersOnly(DBUtilities.getConnection());
         try {
             /*String databaseName = "InvoiceDB";
              String userName = "root";
-             String password = "";
+             String password = "bala";
 
              String url = "jdbc:mysql://localhost:3306/mysql?zeroDateTimeBehavior=convertToNull";
              Connection connection = DriverManager.getConnection(url, userName, password);
@@ -313,33 +347,19 @@ public class SalesGui extends JFrame implements WindowListener {
     @Override
     public void windowClosing(WindowEvent e) {
 
-        FileOutputStream fs = null;
-        ObjectOutputStream os = null;
-        try {
-            fs = new FileOutputStream("frame_bounds");
-            os = new ObjectOutputStream(fs);
-            Rectangle bounds = getBounds();//getSize();
-
-            os.writeObject(bounds);
-            int cols = invoiceEditWidget.salesTable.getColumnCount();
-            for (int col = 0; col < cols; col++) {
-                int i = invoiceEditWidget.salesTable.getColumnModel().getColumn(col).getWidth();
-                os.writeInt(i);
-            }
-            //throw new UnsupportedOperationException("Not supported yet.");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Logger.getLogger(SalesGui.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                os.close();
-                fs.close();
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                Logger.getLogger(SalesGui.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        int confirm = JOptionPane.showOptionDialog(SalesGui.this,
+                "Are You Sure to Close this Application?",
+                "Exit Confirmation", JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE, null, null, null);
+        if (confirm == JOptionPane.YES_OPTION) {
+            DBUtilities.closeConnections();
+            saveFrameBounds();
+            System.exit(1);
+        } else {
+            return;
         }
+
+//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -367,4 +387,23 @@ public class SalesGui extends JFrame implements WindowListener {
         //throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    class ExitListener implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int confirm = JOptionPane.showOptionDialog(SalesGui.this,
+                    "Are You Sure to Close this Application?",
+                    "Exit Confirmation", JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE, null, null, null);
+            if (confirm == JOptionPane.YES_OPTION) {
+                DBUtilities.closeConnections();
+                saveFrameBounds();
+                System.exit(1);
+            } else {
+                return;
+            }
+
+            //throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
 }

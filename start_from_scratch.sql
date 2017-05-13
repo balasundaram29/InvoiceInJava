@@ -100,3 +100,12 @@ CREATE TRIGGER one_invno_per_finyear
                  SET MESSAGE_TEXT = 'Cannot add this invoice no : You can use one invoice no only once in financial year';
           END IF;
       END;$$
+#for use from office network pc (pc a/c name is "ANNAI" USER NAME IS 'root':
+#do this after logging in as root user:
+#CREATE USER 'root'@'ANNAI';
+#GRANT ALL PRIVILEGES ON *.* TO 'root'@'ANNAI'
+#java application will connect from "ANNAI" pc using mysql -u root --host= 'serverip"
+
+
+
+
