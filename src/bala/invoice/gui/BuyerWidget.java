@@ -157,7 +157,7 @@ public class BuyerWidget extends JPanel {
             Connection conn = DBUtilities.getConnection();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(
-                    "SELECT `buyerID`,`name`, `address` FROM `buyers` ORDER BY `name`");
+                    "SELECT `buyerID`,`name`, REPLACE(`address`,'\n',' ') FROM `buyers` ORDER BY `name`");
             //+ " INNER JOIN `buyers` ON `invoices`.`buyerID`=`buyers`.`buyerID`");
             Object[] columnNamesArray = {"BuyerID", "Name", "Address"};
             model = DBUtilities.buildTableModel(rs, columnNamesArray);

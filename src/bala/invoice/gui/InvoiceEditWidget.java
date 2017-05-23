@@ -81,6 +81,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
     JButton addButton;
     JTextField taxRateTextField;
     JComboBox taxTypeCombo;
+    JTextField taxAmountField;
     JCheckBox formCCheckBox;
     JTextField remarksField;
     JTextField totalTextField;
@@ -384,7 +385,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         taxRateTextField.setText("0.00");
         taxRateTextField.getDocument().addDocumentListener(this);
         add(label);
-        add(taxRateTextField, "grow");
+        add(taxRateTextField );
         label = new JLabel("Tax Type :");
         taxTypeCombo = new JComboBox();
         add(label);
@@ -392,17 +393,23 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         taxTypeCombo.addItem("CST");
         add(taxTypeCombo);
 
-        formCCheckBox = new JCheckBox("AgainstForm 'C'");
-        add(formCCheckBox, "grow,wrap");
+
+        label = new JLabel("Tax Amount(Rs.):");
+        add(label);
+        taxAmountField = new JTextField();
+        add(taxAmountField, "width 80:90:100,wrap");
         label = new JLabel("Remarks :");
         add(label);
         remarksField = new JTextField("Accessories : 1 Bag");
-        add(remarksField, "grow");
-        add(new JLabel(" "));//dummy
+        add(remarksField,"growx 20" );
+        
+        formCCheckBox = new JCheckBox("AgainstForm 'C'");
+        add(formCCheckBox);
+      //  add(new JLabel(" "));//dummy
         label = new JLabel("Total(Rs.):");
         totalTextField = new JTextField();
         add(label);
-        add(totalTextField, "grow,wrap,right");
+        add(totalTextField, "growx 20,alignx right,spanx 2,wrap");
         viewAllButton = new JButton("View all Invoices");
         add(viewAllButton);
         viewAllButton.setIcon(new ImageIcon(this.getClass().getResource("viewall24.png")));
@@ -480,7 +487,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         widgetValues.put(InvoiceConstants.INV_NO_KEY, invoiceNoTextField.getText());
         new DatabaseManager().loadValuesIntoHashMapFromDB(conn, widgetValues, productMap, buyerMap);
         if (widgetValues.get(InvoiceConstants.INV_DATE_KEY) == null) {
-           // dChooser.setDate(new Date());
+            // dChooser.setDate(new Date());
             Date firstDate = null;
             Date lastDate = null;
             Date newDate = null;
@@ -789,6 +796,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         taxRate = taxRate1.setScale(2, RoundingMode.HALF_UP);
         BigDecimal tax = total.multiply(taxRate.divide(new BigDecimal(100.0)));
         taxAmount = tax.setScale(2, RoundingMode.UP);
+        taxAmountField.setText(taxAmount.toString());
         grTotal = total.add(taxAmount);
         System.out.println("Gr total is " + grTotal.toString());
         grTotalRounded = grTotal.setScale(0, RoundingMode.HALF_UP);
