@@ -106,7 +106,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
 
         super(new MigLayout(
                 "", // Layout Constraints
-                "[][grow][][grow,right]", // Column constraints
+                "[][][][grow,right]", // Column constraints
                 "[top]20[top]" // Row constraints
         ));
 
@@ -141,7 +141,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
             }
         });
         add(label);
-        add(invoiceNoTextField, "grow");
+        add(invoiceNoTextField, "grow,spanx 2");
 
         label = new JLabel("Date :");
         add(label, "gap unrelated");
@@ -203,7 +203,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
             ex.printStackTrace();
             Logger.getLogger(InvoiceEditWidget.class.getName()).log(Level.SEVERE, null, ex);
         }
-        add(dChooser, "grow,wrap");
+        add(dChooser, "grow,wrap,spanx 2");
         label = new JLabel("Buyer :");
 
         buyerCombo = new JComboBox();
@@ -225,14 +225,14 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
 
         buyerCombo.setMaximumSize(new Dimension(1000, 25));
         add(label);
-        add(buyerCombo, "grow");
+        add(buyerCombo, "grow,spanx 2");
         label = new JLabel("Buyer's Address :");
         add(label, "gap unrelated");
         buyerAddressArea = new JTextArea();
-        buyerAddressArea.setMinimumSize(new Dimension(100, 80));
+        buyerAddressArea.setMinimumSize(new Dimension(50, 80));
 
         buyerAddressArea.setBorder(BorderFactory.createLineBorder(Color.black));
-        add(buyerAddressArea, "wrap,grow");//"cell column row width height"
+        add(buyerAddressArea, "wrap,grow,spanx 2");//"cell column row width height"
         try {
 
             String q = "SELECT `address` from `Buyers` WHERE `name`=" + "\'" + (String) buyerCombo.getSelectedItem() + "\'";
@@ -333,7 +333,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         addButton = new JButton("Add Item");
         addButton.addActionListener(new AddButtonListener());
         addButton.setIcon(new ImageIcon(this.getClass().getResource("add24.png")));
-        add(addButton, "wrap");
+        add(addButton, "cell 5 3,wrap");
         // "cell column row width height"  cell 3 2 50 20,
 
         tableModel = new SalesTableModel();
@@ -385,7 +385,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         taxRateTextField.setText("0.00");
         taxRateTextField.getDocument().addDocumentListener(this);
         add(label);
-        add(taxRateTextField );
+        add(taxRateTextField,"grow" );
         label = new JLabel("Tax Type :");
         taxTypeCombo = new JComboBox();
         add(label);
@@ -441,7 +441,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         saveButton = new JButton("Save");
         saveButton.setIcon(new ImageIcon(this.getClass().getResource("save24.png")));
         saveButton.addActionListener(new SaveButtonListener());
-        add(saveButton);
+        add(saveButton,"cell 5 7");
         populateWidgets();
         //    add(label);
 
@@ -801,7 +801,7 @@ public class InvoiceEditWidget extends JPanel implements DocumentListener {
         System.out.println("Gr total is " + grTotal.toString());
         grTotalRounded = grTotal.setScale(0, RoundingMode.HALF_UP);
         System.out.println("Gr  total rounded is  " + grTotalRounded.toPlainString());
-        totalTextField.setText(grTotalRounded.toString());
+        totalTextField.setText(grTotalRounded.toString()+".00");
     }
 
     public void fillUpMapsFromDisplayedValues() {
